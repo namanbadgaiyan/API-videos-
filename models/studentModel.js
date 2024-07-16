@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken')
 
 const StudentModel = new mongoose.Schema({
     email: {
@@ -29,6 +30,10 @@ StudentModel.pre("save", function(){
 
 StudentModel.methods.comparepassword = function(password){
     return bcrypt.compareSync(password, this.password)  // if password is correct then it will return true otherwise false.
+}
+StudentModel.methods.getjwttoken = function(){
+    return  jwt.sign({id: this._id}, process.env.JWT_SECRET,{expiresIn : process.env.JWT_TOKEN})
+    //jwt ke andar ka jo sign function hai vo 3 chessen leta hai (ID|SECRET|EXPIRE-TIME)
 }
 
 const student = mongoose.model("student", StudentModel);

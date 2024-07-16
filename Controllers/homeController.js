@@ -2,6 +2,7 @@ const { json } = require("express")
 const { CatchErrorHandler } = require("../middlewares/CatchErrorHandler")
 const studentModel = require('../models/studentModel')
 const ErrorHandler = require("../utils/ErrorHandler")
+const { sendtoken } = require("../utils/SendToken")
 
 //this is only use for syncronous code
 
@@ -22,12 +23,17 @@ const ErrorHandler = require("../utils/ErrorHandler")
 // because of very much routes and use of try catch multiple times we use another middleware to prevent writing the code multiple times
 
 exports.homeComponent = CatchErrorHandler(async(req,res,next)=>{
-    res.json({message: "Welcome to the component"})
+    res.json({message: "Secure HOMEpage"})
+})
+
+exports.currentuser =  CatchErrorHandler(async(req,res,next)=>{
+    const student = await studentModel.findById(req.id).exec();
+    res.json({student})
 })
 
 exports.StudentSignup = CatchErrorHandler(async(req,res,next)=>{
     const NewStudentVarialbe = await new studentModel(req.body).save()
-    res.status(201).json(NewStudentVarialbe)
+    sendtoken(NewStudentVarialbe, 201 , res)
 })
 
 exports.StudentLogin = CatchErrorHandler(async(req,res,next)=>{
@@ -46,9 +52,10 @@ exports.StudentLogin = CatchErrorHandler(async(req,res,next)=>{
             new ErrorHandler('incorrect password', 401)
         )
     }
-    res.json(student)
+    sendtoken(student, 200 , res)
 })
 
 exports.StudentLogout = CatchErrorHandler(async(req,res,next)=>{
-
+    res.clearCookie("token");
+    res.json({message: 'loged out successful'})
 })
