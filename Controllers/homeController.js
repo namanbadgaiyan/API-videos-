@@ -3,6 +3,7 @@ const { CatchErrorHandler } = require("../middlewares/CatchErrorHandler")
 const studentModel = require('../models/studentModel')
 const ErrorHandler = require("../utils/ErrorHandler")
 const { sendtoken } = require("../utils/SendToken")
+const { sendingMail } = require("../utils/nodemailer")
 
 //this is only use for syncronous code
 
@@ -58,4 +59,50 @@ exports.StudentLogin = CatchErrorHandler(async(req,res,next)=>{
 exports.StudentLogout = CatchErrorHandler(async(req,res,next)=>{
     res.clearCookie("token");
     res.json({message: 'loged out successful'})
+})
+
+exports.StudentSendMail = CatchErrorHandler(async(req, res, next)=>{
+    const student = await studentModel.findOne({email : req.body.email}).exec()
+
+    if(!student){
+        return next(
+            new ErrorHandler('student not found with this email', 404)
+        )
+    }
+
+    const url = `${req.protocol}://${req.get('host')}/student/forget-password/${student._id}`
+
+    sendingMail(req, res, next, url)
+    student.resetPasswordLink = "1"
+    student.save()
+})
+
+exports.studentForgetPassword = CatchErrorHandler(async(req, res, next)=>{
+    const student = await studentModel.findById({_id : req.params.id}).exec()
+
+    if(!student){
+        return next(
+            new ErrorHandler('student not found with this email', 404)
+        )
+    }
+
+    if(student.resetPasswordLink === "1"){
+        student.resetPasswordLink = "0"
+        student.password = req.body.password;
+    }else{
+        return next(
+            new ErrorHandler('link expired , Please try again', 500)
+        )
+    }
+    await student.save()
+    res.status(200).json({
+        message: 'password changed'
+    })
+})
+
+exports.studentResetPassword = CatchErrorHandler(async(req, res, next)=>{
+    const student = await studentModel.findById({_id : req.params.id}).exec()
+    student.password = req.body.password
+    await student.save()
+    sendtoken(student, 201, res)
 })
