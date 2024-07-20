@@ -4,6 +4,8 @@ const studentModel = require('../models/studentModel')
 const ErrorHandler = require("../utils/ErrorHandler")
 const { sendtoken } = require("../utils/SendToken")
 const { sendingMail } = require("../utils/nodemailer")
+const imagekit = require('../utils/imagekit').InitImageKit()
+const path = require('path')
 
 //this is only use for syncronous code
 
@@ -105,4 +107,37 @@ exports.studentResetPassword = CatchErrorHandler(async(req, res, next)=>{
     student.password = req.body.password
     await student.save()
     sendtoken(student, 201, res)
+})
+
+
+exports.studentUpdate = CatchErrorHandler(async(req,res,next)=>{
+    await studentModel.findByIdAndUpdate(req.params.id ,req.body).exec()
+    res.status(200).json({
+        success: true,
+        message : 'updated successfully',
+    })
+
+})
+
+
+exports.studentAvatar = CatchErrorHandler(async(req,res,next)=>{
+    const student = await studentModel.findById(req.params.id).exec()
+    const file = req.files.avatar
+    const NewFileName = `uploads-${Date.now()}${path.extname(file.name)}`
+
+    if(student.avatar.fileId !== ''){
+        await imagekit.deleteFile(student.avatar.fileId)
+    }
+
+    const {fileId,url} = await imagekit.upload({
+        file : file.data,
+        fileName : NewFileName,
+    })
+    student.avatar = {fileId , url};
+    await student.save()
+    
+    res.status(200).json({
+        success: true,
+        message : 'profile updated successfully',
+    })
 })

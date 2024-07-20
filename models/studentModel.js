@@ -3,6 +3,31 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 
 const StudentModel = new mongoose.Schema({
+    firstname:{
+        type: String,
+        required: [true,'Firstname is Required'],
+        minlength: [2, 'Firstname must be at least 2 characters long'],
+    },
+    lastname:{
+        type: String,
+        required: [true,'Lastname is Required'],
+        minlength: [2, 'Lastname must be at least 2 characters long'],
+    },
+    city:{
+        type: String,
+        required: [true,'City is Required'],
+        minlength: [2, 'City must be at least 2 characters long'],
+    },
+    city:{
+        type: String,
+        required: [true,'city is Required'],
+        minlength: [2, 'city must be at least 2 characters long'],
+    },
+    gender:{
+        type: String,
+        required: [true, 'Gender is Required'],
+        enum: ['Male','Female','Other']
+    },
     email: {
         type: String,
         required: [true,'Email is Required'],
@@ -21,7 +46,14 @@ const StudentModel = new mongoose.Schema({
     resetPasswordLink: {
         type: String,
         default: "0",
-    }
+    },
+    avatar: {
+        type: Object,
+        default: {
+            fileId : '',
+            url: "https://plus.unsplash.com/premium_photo-1687284884918-e230d35bb15a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZGVmYXVsdCUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D"
+        },
+    },
 },{timestamps: true})
 
 StudentModel.pre("save", function(){
