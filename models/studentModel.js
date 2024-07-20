@@ -58,7 +58,9 @@ const StudentModel = new mongoose.Schema({
         projects : [],
         skills : [],
         accomplishments : [],
-    }
+    },
+    internships : [{type: mongoose.Schema.Types.ObjectId , ref:'internships'}],
+    jobs : [{type: mongoose.Schema.Types.ObjectId , ref:'jobs'}],
 },{timestamps: true})
 
 StudentModel.pre("save", function(){

@@ -29,7 +29,7 @@ const fileupload = require('express-fileupload')
 app.use(fileupload())
 
 //routes
-app.use('/user', require('./Routers/indexRouters'))
+app.use('/user', require('./routers/indexRouters'))
 app.use('/resume', require('./routers/resumeRouters'))
 app.use('/employe', require('./routers/employeRouter'))
 

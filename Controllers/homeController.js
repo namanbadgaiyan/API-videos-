@@ -1,6 +1,8 @@
 const { json } = require("express")
 const { CatchErrorHandler } = require("../middlewares/CatchErrorHandler")
 const studentModel = require('../models/studentModel')
+const internshipModel = require('../models/internshipModel')
+const jobModel = require('../models/jobModel')
 const ErrorHandler = require("../utils/ErrorHandler")
 const { sendtoken } = require("../utils/SendToken")
 const { sendingMail } = require("../utils/nodemailer")
@@ -139,5 +141,29 @@ exports.studentAvatar = CatchErrorHandler(async(req,res,next)=>{
     res.status(200).json({
         success: true,
         message : 'profile updated successfully',
+    })
+})
+
+exports.studentinternship =  CatchErrorHandler(async(req,res,next)=>{
+    const student = await studentModel.findById(req.id).exec();
+    const internship = await internshipModel.findById(req.params.internid).exec()
+    student.internships.push(internship._id)
+    internship.student.push(student._id)
+    await student.save()
+    await internship.save()
+    res.status(200).json({
+        message : "applied for internship"
+    })
+})
+
+exports.studentjob =  CatchErrorHandler(async(req,res,next)=>{
+    const student = await studentModel.findById(req.id).exec();
+    const job = await jobModel.findById(req.params.jobid).exec()
+    student.jobs.push(job._id)
+    job.student.push(student._id)
+    await student.save()
+    await job.save()
+    res.status(200).json({
+        message : "applied for job"
     })
 })
